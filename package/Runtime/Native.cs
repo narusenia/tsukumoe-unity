@@ -59,6 +59,19 @@ namespace Tsukumoe
             public byte style_changed;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        public struct AutoConfig
+        {
+            public uint size;
+            public uint flags;
+            public ulong blink_seed;
+            public IntPtr blink_left_eye;
+            public IntPtr blink_right_eye;
+            public float blink_interval, blink_close_time, blink_closed_time, blink_open_time;
+            public IntPtr breath_parameter;
+            public float breath_cycle, breath_amplitude, breath_offset;
+        }
+
         [DllImport(Lib)] public static extern uint tsukumoe_abi_version();
         [DllImport(Lib)] public static extern IntPtr tsukumoe_last_error_message();
         [DllImport(Lib)] public static extern int tsukumoe_runtime_load(byte* data, UIntPtr len, out IntPtr runtime);
@@ -67,6 +80,18 @@ namespace Tsukumoe
         [DllImport(Lib)] public static extern int tsukumoe_runtime_parameter_info(IntPtr runtime, uint index, out ParameterInfo info);
         [DllImport(Lib)] public static extern int tsukumoe_runtime_parameter_index(IntPtr runtime, [MarshalAs(UnmanagedType.LPUTF8Str)] string name, out uint index);
         [DllImport(Lib)] public static extern int tsukumoe_runtime_set_parameter(IntPtr runtime, uint index, float value);
+        [DllImport(Lib)] public static extern int tsukumoe_runtime_clear_parameter(IntPtr runtime, uint index);
+        [DllImport(Lib)] public static extern int tsukumoe_runtime_parameter_value(IntPtr runtime, uint index, out float value);
+        [DllImport(Lib)] public static extern int tsukumoe_runtime_motion_count(IntPtr runtime, out uint count);
+        [DllImport(Lib)] public static extern int tsukumoe_runtime_motion_name(IntPtr runtime, uint index, out IntPtr name);
+        [DllImport(Lib)] public static extern int tsukumoe_runtime_expression_count(IntPtr runtime, out uint count);
+        [DllImport(Lib)] public static extern int tsukumoe_runtime_expression_name(IntPtr runtime, uint index, out IntPtr name);
+        [DllImport(Lib)] public static extern int tsukumoe_runtime_play_motion(IntPtr runtime, [MarshalAs(UnmanagedType.LPUTF8Str)] string name, uint layer, int priority, out uint started);
+        [DllImport(Lib)] public static extern int tsukumoe_runtime_stop_motion(IntPtr runtime, uint layer);
+        [DllImport(Lib)] public static extern int tsukumoe_runtime_is_motion_playing(IntPtr runtime, uint layer, out uint playing);
+        [DllImport(Lib)] public static extern int tsukumoe_runtime_play_expression(IntPtr runtime, [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
+        [DllImport(Lib)] public static extern int tsukumoe_runtime_stop_expression(IntPtr runtime, [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
+        [DllImport(Lib)] public static extern int tsukumoe_runtime_set_auto(IntPtr runtime, ref AutoConfig config);
         [DllImport(Lib)] public static extern int tsukumoe_runtime_update(IntPtr runtime, float dt);
         [DllImport(Lib)] public static extern int tsukumoe_runtime_draw_buffers(IntPtr runtime, out DrawBuffers buffers);
         [DllImport(Lib)] public static extern int tsukumoe_runtime_drawable(IntPtr runtime, uint position, out Drawable drawable);
