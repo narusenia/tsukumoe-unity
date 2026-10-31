@@ -17,7 +17,7 @@ namespace Tsukumoe
     public static unsafe class TsukumoeCapture
     {
         [Serializable]
-        class Drawable
+        public class Drawable
         {
             public uint mesh, texture;
             public int blend_mode;
@@ -28,7 +28,7 @@ namespace Tsukumoe
         }
 
         [Serializable]
-        class DrawList { public Drawable[] drawables; }
+        public class DrawList { public Drawable[] drawables; }
 
         /// <summary>Drawables back to front, like the draw list <c>order</c>.</summary>
         public static string DrawListJson(TsukumoeModel model)
@@ -51,6 +51,67 @@ namespace Tsukumoe
                 });
             }
             return JsonUtility.ToJson(new DrawList { drawables = list.ToArray() });
+        }
+
+
+        /// <summary>
+        /// Plays a parity case (seimei <c>tests/parity/cases/*.json</c>): the model is loaded (which evaluates the
+        /// default frame once), then every step applies <c>params</c>, starts <c>motion</c> on layer 0 at Normal
+        /// priority and <c>expression</c>, and calls <c>Update(dt)</c> <c>repeat</c> times. Returns the pixels
+        /// (premultiplied RGBA8, top row first) and the draw-list JSON.
+        /// </summary>
+        public static (byte[] Rgba, string Json) RunCase(byte[] tmod, string caseJson)
+        {
+            var c = (Dictionary<string, object>)MiniJson.Parse(caseJson);
+            var size = (List<object>)c["size"];
+            var v = (List<object>)c["view"];
+            int width = (int)(double)size[0], height = (int)(double)size[1];
+            var view = new Vector4((float)(double)v[0], (float)(double)v[1], (float)(double)v[2], (float)(double)v[3]);
+
+            using var model = new TsukumoeModel(tmod);
+            foreach (Dictionary<string, object> s in (List<object>)c["steps"])
+            {
+                if (s.TryGetValue("params", out var ps))
+                    foreach (var kv in (Dictionary<string, object>)ps)
+                    {
+                        int i = model.ParameterIndex(kv.Key);
+                        if (i < 0) throw new ArgumentException("no parameter " + kv.Key);
+                        model.SetParameter(i, (float)(double)kv.Value);
+                    }
+                if (s.TryGetValue("motion", out var m)) model.PlayMotion((string)m, 0, MotionPriority.Normal);
+                if (s.TryGetValue("expression", out var e)) model.PlayExpression((string)e);
+                int repeat = s.TryGetValue("repeat", out var r) ? (int)(double)r : 1;
+                for (int k = 0; k < repeat; k++) model.Update((float)(double)s["dt"]);
+            }
+            using var renderer = new OffscreenRenderer(model, TsukumoeShaders.Drawable);
+            var rt = new RenderTexture(OffscreenRenderer.Descriptor(width, height));
+            renderer.Upload();
+            renderer.Render(view, rt);
+            var rgba = OffscreenRenderer.ReadPixels(rt);
+            rt.Release();
+            return (rgba, DrawListJson(model));
+        }
+
+        /// <summary>Command line: -tsukumoe-cases dir -tsukumoe-models dir -tsukumoe-out dir; writes <c>&lt;case&gt;.rgba</c> and <c>.json</c> for every case.</summary>
+        public static void RunCasesFromCommandLine()
+        {
+            string Arg(string name)
+            {
+                var a = Environment.GetCommandLineArgs();
+                int i = Array.IndexOf(a, name);
+                return i >= 0 && i + 1 < a.Length ? a[i + 1] : throw new ArgumentException("missing " + name);
+            }
+            string cases = Arg("-tsukumoe-cases"), models = Arg("-tsukumoe-models"), outDir = Arg("-tsukumoe-out");
+            Directory.CreateDirectory(outDir);
+            foreach (var file in Directory.GetFiles(cases, "*.json"))
+            {
+                var text = File.ReadAllText(file);
+                var model = (string)((Dictionary<string, object>)MiniJson.Parse(text))["model"];
+                var (rgba, json) = RunCase(File.ReadAllBytes(Path.Combine(models, model)), text);
+                var name = Path.GetFileNameWithoutExtension(file);
+                File.WriteAllBytes(Path.Combine(outDir, name + ".rgba"), rgba);
+                File.WriteAllText(Path.Combine(outDir, name + ".json"), json);
+            }
         }
 
         /// <summary>Renders the default pose and writes <c>out.rgba</c> and <c>out.json</c>.</summary>

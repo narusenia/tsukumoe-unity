@@ -32,6 +32,10 @@ scripts/build-plugin.sh /path/to/tsukumoe   # macOS: copies libtsukumoe_ffi.dyli
 
 `project/` is a Unity project that references `package/`. Tests: `Unity -batchmode -projectPath project -runTests -testPlatform EditMode` (and `PlayMode`). `TsukumoeCapture` writes pixels and the draw list as JSON for comparing environments.
 
+## Parity with the native runtime
+
+`package/Tests/Fixtures/parity/` holds seimei's parity cases, models and native output (golden). `scripts/import-golden.sh [seimei]` refreshes it; the PlayMode `ParityTests` compare every case with it (pixels 2/255, draw-list numbers 1e-4, order, masks, blend mode and flags equal). `scripts/parity.sh <out-dir>` runs the cases in the editor (batch mode, with graphics) and writes `<case>.rgba` / `<case>.json` for seimei's `tsukumoe parity <native> <unity> --width 512`.
+
 ## License
 
 Apache-2.0 OR MIT.
