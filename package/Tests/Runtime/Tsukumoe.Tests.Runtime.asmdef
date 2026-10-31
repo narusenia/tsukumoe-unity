@@ -1,0 +1,10 @@
+{
+  "name": "Tsukumoe.Tests.Runtime",
+  "references": [
+    "Tsukumoe.Runtime",
+    "UnityEngine.TestRunner"
+  ],
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ]
+}

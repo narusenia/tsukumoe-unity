@@ -1,0 +1,14 @@
+{
+  "name": "Tsukumoe.Tests.Editor",
+  "references": [
+    "Tsukumoe.Runtime",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ]
+}
