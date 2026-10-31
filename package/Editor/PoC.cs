@@ -28,7 +28,7 @@ namespace Tsukumoe.Editor
             {
                 var size = Arg("-size").Split('x');
                 int w = int.Parse(size[0]), h = int.Parse(size[1]);
-                var shader = AssetDatabase.LoadAssetAtPath<Shader>("Packages/com.tsukumoe.unity/Runtime/Shaders/Drawable.shader");
+                var shader = TsukumoeShaders.Drawable;
                 using var model = new TsukumoeModel(File.ReadAllBytes(Arg("-tmod")));
                 using var r = new OffscreenRenderer(model, shader);
                 var vs = Arg("-view");
@@ -40,7 +40,10 @@ namespace Tsukumoe.Editor
                     view = new Vector4(F(0), F(1), F(2), F(3));
                 }
                 Debug.Log($"TSUKUMOE VIEW {view.x.ToString("R", CultureInfo.InvariantCulture)},{view.y.ToString("R", CultureInfo.InvariantCulture)},{view.z.ToString("R", CultureInfo.InvariantCulture)},{view.w.ToString("R", CultureInfo.InvariantCulture)} colorspace={PlayerSettings.colorSpace} api={SystemInfo.graphicsDeviceType}");
-                File.WriteAllBytes(Arg("-out"), r.Render(view, w, h));
+                var rt = new RenderTexture(OffscreenRenderer.Descriptor(w, h));
+                r.Upload();
+                r.Render(view, rt);
+                File.WriteAllBytes(Arg("-out"), OffscreenRenderer.ReadPixels(rt));
                 EditorApplication.Exit(0);
             }
             catch (Exception e)
