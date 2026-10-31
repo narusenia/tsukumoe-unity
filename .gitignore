@@ -9,3 +9,4 @@ package/Runtime/Plugins/*/*.dylib
 package/Runtime/Plugins/*/*.dll
 package/Runtime/Plugins/*/*.so
 .DS_Store
+/project/Assets/CaptureScene.unity*
