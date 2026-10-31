@@ -21,10 +21,6 @@ namespace Tsukumoe.Tests
         static IEnumerable<string> Cases() =>
             Directory.GetFiles(Dir + "cases", "*.json").Select(Path.GetFileNameWithoutExtension).OrderBy(n => n);
 
-        // Pixels that sit exactly on a triangle edge and are covered in Unity but not in the native
-        // renderer (different rasterizer tie-breaking); a case may exceed 2/255 by at most this many pixels.
-        static readonly Dictionary<string, int> KnownEdgePixels = new() { ["reference-physics-settle"] = 2 };
-
         [TestCaseSource(nameof(Cases))]
         public void MatchesNative(string name)
         {
@@ -38,8 +34,7 @@ namespace Tsukumoe.Tests
             for (int i = 0; i < rgba.Length; i += 4)
                 for (int k = 0; k < 4; k++)
                     if (Mathf.Abs(rgba[i + k] - golden[i + k]) > 2) { over++; break; }
-            KnownEdgePixels.TryGetValue(name, out var allowed);
-            Assert.LessOrEqual(over, allowed, "pixels over 2/255");
+            Assert.AreEqual(0, over, "pixels over 2/255");
 
             var want = JsonUtility.FromJson<TsukumoeCapture.DrawList>(File.ReadAllText(Dir + "golden/" + name + ".json")).drawables;
             var got = JsonUtility.FromJson<TsukumoeCapture.DrawList>(json).drawables;
