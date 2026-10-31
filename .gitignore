@@ -1,0 +1,11 @@
+/project/Library/
+/project/Temp/
+/project/Logs/
+/project/UserSettings/
+/project/obj/
+*.csproj
+*.sln
+package/Runtime/Plugins/*/*.dylib
+package/Runtime/Plugins/*/*.dll
+package/Runtime/Plugins/*/*.so
+.DS_Store

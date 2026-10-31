@@ -1,0 +1,5 @@
+{
+  "name": "Tsukumoe.Runtime",
+  "rootNamespace": "Tsukumoe",
+  "allowUnsafeCode": true
+}

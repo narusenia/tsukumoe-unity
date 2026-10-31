@@ -1,0 +1,8 @@
+{
+  "name": "com.tsukumoe.unity",
+  "version": "0.1.0",
+  "displayName": "Tsukumoe",
+  "description": "Play Tsukumoe .tmod models in Unity. Evaluation runs in the tsukumoe-ffi native plugin; drawing uses Unity shaders.",
+  "unity": "6000.3",
+  "license": "Apache-2.0 OR MIT"
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Tsukumoe.Editor",
+  "rootNamespace": "Tsukumoe.Editor",
+  "references": ["Tsukumoe.Runtime"],
+  "includePlatforms": ["Editor"]
+}
